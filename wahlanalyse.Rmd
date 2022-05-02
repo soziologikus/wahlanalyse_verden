@@ -36,7 +36,7 @@ Rückfragen und Anregungen gehen bitte an [w.reichmann@gruene-verden-aller.de](m
 
 ```{r Create Data Frames, echo=FALSE, warning=FALSE, message=FALSE}
 # In this chunk I create 3 dataframes:
-# 1. "verden_border_ll" beinhaltet die Daten für die Gemeindegranzen im lat/long-Format
+# 1. "verden_border_ll" includes the data for the vorders of Verden (Aller) in lat/long-format
 # 2. "wahlbezirke" beinhaltet die Daten der Koordinaten aller Adressen und den dazugehörigen Wahlbezirknummern
 # 3. "wahlergebnisse" beinhaltet die Daten der Wahlen
 # 4. "wahl21" ist der Datensatz der 1 und 2 verbindet
