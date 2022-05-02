@@ -35,7 +35,7 @@ Rückfragen und Anregungen gehen bitte an [w.reichmann@gruene-verden-aller.de](m
 # Übersicht
 
 ```{r Create Data Frames, echo=FALSE, warning=FALSE, message=FALSE}
-# In diesem Chunk erstelle ich 3 Datensätze
+# In this chunk I create 3 dataframes:
 # 1. "verden_border_ll" beinhaltet die Daten für die Gemeindegranzen im lat/long-Format
 # 2. "wahlbezirke" beinhaltet die Daten der Koordinaten aller Adressen und den dazugehörigen Wahlbezirknummern
 # 3. "wahlergebnisse" beinhaltet die Daten der Wahlen
