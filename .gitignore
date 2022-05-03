@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 wahlanalyse.html
-/data/raw_data/
-/data/shp_file/
+data/raw_data/
+data/shp_file/
+wahlanalyse_verden.Rproj
