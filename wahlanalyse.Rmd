@@ -7,7 +7,6 @@ output:
     toc: false
     number_sections: true
     theme: flatly
-    
 ---
 
 ```{r libraries, echo=FALSE, message=FALSE, warning=FALSE}
@@ -26,13 +25,14 @@ library(kableExtra) # we need this to format kable()-tables https://haozhu233.gi
 
 ```
 
+**Version 0.4**
+
 # Einleitung
 
-Am 12.9.2021 wurde in der Stadt Verden (Aller) die Wahl zum Stadtrat abgehalten. In diesem Dokument werden frei verfügbare Daten zu dieser Wahl ausgewertet. Es startet mit einer Übersicht über Wahlbeteiligung und Erststimmen und geht über zur Analyse des Wahlergebnis der Verdener Grünen. Am Ende folgen einige persönliche und damit höchst subjektive Interpretationen. Diese sollten als Anregungen und Diskussionsanreize gelesen werden. Daten & Fakten sind (anders als man es uns häufig weismachen will) immer auch 
+Am 12.9.2021 wurde in der Stadt Verden (Aller) die letzte Wahl zum Stadtrat abgehalten. In diesem Dokument werden frei verfügbare Daten zu dieser Wahl ausgewertet. Es startet mit einer Übersicht über Wahlbeteiligung und Briefwahl und geht dann über zur Analyse des Wahlergebnis der Verdener Grünen. Am Ende folgen einige persönliche und damit höchst subjektive Interpretationen. Diese sollten als Anregungen und Diskussionsanreize zB für die AG Demokratie stärken und darüber hinaus gelesen werden. 
 
-Rückfragen und Anregungen gehen bitte an [w.reichmann@gruene-verden-aller.de](mailto:w.reichmann@gruene-verden-aller.de){.email}.
+Kritik, Rückfragen und Anregungen gehen bitte an [Werner Reichmann](mailto:w.reichmann@gruene-verden-aller.de){.email}.
 
-# Übersicht
 
 ```{r Create Data Frames, echo=FALSE, warning=FALSE, message=FALSE}
 # In this chunk I create 3 dataframes:
@@ -137,19 +137,82 @@ wahlergebnisse$wahlbeteiligung <-100/wahlergebnisse$Wahlberechtigte*wahlergebnis
 
 wahlergebnisse$gruener_anteil <- 100/wahlergebnisse$Gueltige_Stimmen*wahlergebnisse$Gruene_Alle_Stimmen
 
+wahlergebnisse$briefwahl_anteil <- 100/wahlergebnisse$Gueltige_Stimmen*wahlergebnisse$Briefwähler
+
 wahl21 <- merge(wahlbezirke, wahlergebnisse[1:28,], by = "wahlbezirksnummer", all=TRUE)
 ```
 
-Bei der Stadtratswahl 2021 waren `r sum(wahlergebnisse$Wahlberechtigte)` Menschen wahlberechtigt.
+# Wahlbeteiligung & Briefwahl
 
-Es wurden `r sum(wahlergebnisse$Gueltige_Stimmzettel)` gültige Stimmzettel abgegeben.
+Bei der Stadtratswahl 2021 waren `r sum(wahlergebnisse$Wahlberechtigte)` Menschen wahlberechtigt. Es wurden `r sum(wahlergebnisse$Gueltige_Stimmzettel)` gültige Stimmzettel abgegeben. Das ergibt eine Wahlbeteiligung über das gesamte Stadtgebiet von `r 100/sum(wahlergebnisse$Wahlberechtigte)*sum(wahlergebnisse$Gueltige_Stimmzettel)`%. Das bedeutet, dass sich `r sum(wahlergebnisse$Wahlberechtigte)-sum(wahlergebnisse$Gueltige_Stimmzettel)` Menschen **nicht** an der Wahl beteiligt haben.
 
-Das ergibt eine Wahlbeteiligung über das gesamte Stadtgebiet von `r 100/sum(wahlergebnisse$Wahlberechtigte)*sum(wahlergebnisse$Gueltige_Stimmzettel)`% und das bedeutet, dass sich `r sum(wahlergebnisse$Wahlberechtigte)-sum(wahlergebnisse$Gueltige_Stimmzettel)` Menschen nicht an der Wahl beteiligt haben.
+Die Stadt Verden (Aller) ist in 28 Wahlbezirke unterteilt. Jede Adresse ist genau einem Wahlbezirk zugeordnet. Diese Bezirke sind allerdings keine einheitlichen Flächen sondern überschneiden sich teilweise oder sind historisch gewachsen und sind daher (so wie in Eitze) ziemlich durcheinander.
 
+In den Wahlbezirken ist die Wahlbeteiligung unterschiedlich. Sie schwankt zwischen `r min(wahlergebnisse[1:28,]$wahlbeteiligung)`% und `r max(wahlergebnisse[1:28,]$wahlbeteiligung)`%. Die folgende Karte zeigt die Wahlbeteiligung in den einzelnen Wahlbezirken.
 
-Der Anteil Briefwähler:innen an allen Wähler:innen beträgt `r 100/sum(wahlergebnisse$Waehler)*sum(wahlergebnisse$Briefwähler)`%. Von den Briefwähler:innen wissen wir nicht, in welchem Wahlbezirk sie wohnen. Die Grünen haben `r sum(wahlergebnisse[29:42,]$Gruene_Alle_Stimmen)` Stimmen über die Briefwahl bekommen. Das sind `r 100/sum(wahlergebnisse$Gruene_Alle_Stimmen)*sum(wahlergebnisse[29:42,]$Gruene_Alle_Stimmen)`%.
+```{r Karte Wahlbeteiligung, echo=FALSE, message = FALSE, out.width="100%"}
+pal <- colorNumeric(
+  palette = "Greens", 
+  domain = wahl21$wahlbeteiligung)
 
-Die Anteile der Briefwahlstimmen im Vergleich über die Listen:
+leaflet(data = wahl21) %>% 
+  addTiles() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    verden_border_ll$long, 
+    verden_border_ll$lat, 
+    color = "black", 
+    weight = 5, 
+    fillOpacity = 0.00001) %>%
+  addCircleMarkers(
+    radius = 5,
+    fillColor = ~pal(wahl21$wahlbeteiligung),
+    stroke=FALSE,
+    fillOpacity = 0.9) %>%
+  addLegend("bottomright", pal = pal, values = ~wahl21$wahlbeteiligung,
+            title = "Wahlbeteiligung (o. Briefwahl)",
+            labFormat = labelFormat(suffix = "%"),
+            opacity = 1
+  )
+
+```
+
+Es zeigt sich, dass die Beteiligung der PräsenzwählerInnen in den alten Dorfzentren am höchsten ist und mit Nähe zur Kernstadt sinkt.
+
+Der Anteil derjenigen, die als BriefwählerInnen wahlberechtigt an allen WählerInnen beträgt `r 100/sum(wahlergebnisse$Waehler)*sum(wahlergebnisse$Briefwähler)`%. Die Grünen haben `r sum(wahlergebnisse[29:42,]$Gruene_Alle_Stimmen)` Stimmen über die Briefwahl bekommen. Das sind `r 100/sum(wahlergebnisse$Gruene_Alle_Stimmen)*sum(wahlergebnisse[29:42,]$Gruene_Alle_Stimmen)`% aller Stimmen für die Grünen.
+
+Die Briefwahlberechtigten verteilen sich räumlich wie folgt:
+
+```{r Karte Briefwahlbeteiligung, echo=FALSE, message = FALSE, out.width="100%"}
+pal <- colorNumeric(
+  palette = "Greens", 
+  domain = wahl21$briefwahl_anteil)
+
+leaflet(data = wahl21) %>% 
+  addTiles() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    verden_border_ll$long, 
+    verden_border_ll$lat, 
+    color = "black", 
+    weight = 5, 
+    fillOpacity = 0.00001) %>%
+  addCircleMarkers(
+    radius = 5,
+    fillColor = ~pal(wahl21$briefwahl_anteil),
+    stroke=FALSE,
+    fillOpacity = 0.9) %>%
+  addLegend("bottomright", pal = pal, values = ~wahl21$briefwahl_anteil,
+            title = "Anteil Briefwahl",
+            labFormat = labelFormat(suffix = "%"),
+            opacity = 1
+  )
+
+```
+
+Der Anteil der BriefwählerInnen ist in der Kernstadt am höchsten und in den alten Dorfzentren am niedrigsten.
+
+Die Listen bekamen unterschiedlich viele Briefwahlstimmen:
 
 ```{r Tabelle Briefwähler x Listen, echo = FALSE}
 
@@ -172,55 +235,37 @@ remove(df_temp)
 
 ```
 
-# Die räumliche Verteilung der Wahlbeteiligung
+Wie auch im Bundestrend haben die Grünen in Verden auf kommunaler Ebene den größten Anteil an BriefwählerInnen als die anderen Listen.
 
-Die Stadt Verden (Aller) ist in 28 Wahlbezirke unterteilt. Jede Adresse ist einem Wahlbezirk zugeordnet. Diese Bezirke sind allerdings keine einheitlichen Flächen sondern überschneiden sich teilweise oder sind (so wie in Eitze) relativ durcheinander.
+# Grüne WählerInnen in Verden
 
-Wie bereits beschrieben wissen wir von `r 100/sum(wahlergebnisse$Waehler)*sum(wahlergebnisse$Briefwähler)`% der WählerInnen nicht, in welchem Wahlbezirk sie wohnen. BriefwählerInnen sind nicht einem "Wahlbezirk" zugeteilt sondern bilden formal einen eigenen Wahlbezirk.
+Alle Wahlberechtigten hatten 3 Stimmen zu vergeben. Die Stimmen konnten beliebig über die Listen und Personen verteilt werden. Die Grünen haben bei der Kommunalwahl 2021 insgesamt `r sum(wahlergebnisse$Gruene_Alle_Stimmen)` Stimmen bekommen, das sind `r 100/sum(wahlergebnisse$Gueltige_Stimmen)*sum(wahlergebnisse$Gruene_Alle_Stimmen)`%.
 
-In den Wahlbezirken ist die Wahlbeteiligung recht unterschiedlich. Sie schwankt zwischen `r min(wahlergebnisse[1:28,]$wahlbeteiligung)`% und `r max(wahlergebnisse[1:28,]$wahlbeteiligung)`%. Die folgende Karte zeigt die Wahlbeteiligung in den einzelnen Wahlbezirken.
+Im Vergleich zu den drei Wahlen davor ist das das beste Wahlergebnis:
 
+```{r Tabelle Grüner Anteil über die Jahre, echo=FALSE}
+ergebnis2006 <- c(33.8, 38.5, 12.3, 9.2)
+ergebnis2011 <- c(35.1, 43.4, 1.8, 12.9)
+ergebnis2016 <- c(35.2, 35.3, 8.9, 11.1)
+ergebnis2021 <- c(33.1, 29.7, 11.3, 19.2)
 
-```{r Karte Wahlbeteiligung, echo=FALSE, message = FALSE, out.width="100%"}
-pal <- colorNumeric(
-  palette = "Greens", 
-  domain = wahl21$wahlbeteiligung)
+df_temp <- data.frame(parteien, ergebnis2016, ergebnis2011, ergebnis2006, ergebnis2021)
 
-leaflet(data = wahl21) %>% 
-  addTiles() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    verden_border_ll$long, 
-    verden_border_ll$lat, 
-    color = "black", 
-    weight = 5, 
-    fillOpacity = 0.00001) %>%
-  addCircleMarkers(
-    radius = 5,
-    fillColor = ~pal(wahl21$wahlbeteiligung),
-    stroke=FALSE,
-    fillOpacity = 0.9) %>%
-  addLegend("bottomright", pal = pal, values = ~wahl21$wahlbeteiligung,
-            title = "Wahlbeteiligung (ohne Briefwahl)",
-            labFormat = labelFormat(suffix = "%"),
-            opacity = 1
-  )
+df_temp %>%
+  kbl(col.names = c("Parteien", "2006", "2011", "2016", "2021"),
+      caption = "Stadtratswahlergebnisse") %>%
+  kable_styling(bootstrap_options = c("hover"), 
+                full_width = F, 
+                position = "center")
+remove(df_temp, ergebnis2006, ergebnis2011, ergebnis2016, ergebnis2021)
 
 ```
 
-Man sieht, dass die Beteiligung der PräsenzwählerInnen in den alten Dorfzentren am höchsten ist und mit Nähe zur Kernstadt sinkt.
 
 
-# Grüne WählerInnen
+Die Anzahl der Menschen, die die Grünen gewählt haben, lässt sich nicht exakt bestimmen. Unter der Annahme, dass alle, die die Grünen gewählt haben, kumuliert haben, gab es `r sum(wahlergebnisse$Gruene_Alle_Stimmen)/3` GrünwählerInnen. Das ist aber nicht sehr wahrscheinlich, da sicher auch viele panaschiert (also ihre Stimmen über die Listen verteilt) haben. Im Maximalfall gab es so viele WählerInnen wie Stimmen - die Anzahl der GrünwählerInnen bewegt sich also zwischen `r sum(wahlergebnisse$Gruene_Alle_Stimmen)/3` und `r sum(wahlergebnisse$Gruene_Alle_Stimmen)`.
 
-
-
-
-JedeR WahlberechtigteR hatte 3 Stimmen zu vergeben. Die Stimmen konnten beliebig über die Listen und Personen verteilt werden. Die Grünen haben bei der Kommunalwahl 2021 insgesamt `r sum(wahlergebnisse$Gruene_Alle_Stimmen)` Stimmen bekommen. Die Anzahl der Menschen, die die Grünen gewählt haben, lässt sich nicht exakt bestimmen. Unter der Annahme, dass alle, die die Grünen gewählt haben, kummuliert haben, gab es `r sum(wahlergebnisse$Gruene_Alle_Stimmen)/3` Gründwähler:innen. Das ist aber nicht sehr wahrscheinlich, da sicher auch viele panaschiert (also ihre Stimmen auch über die Listen verteilt) haben. Im Maximalfall gab es so viele WählerInnen wie Stimmen - die Anzahl der Grünwähler:innen bewegt sich also zwischen `r sum(wahlergebnisse$Gruene_Alle_Stimmen)/3` und `r sum(wahlergebnisse$Gruene_Alle_Stimmen)`.
-
-Die Gesamtstimmenanzahl setzt sich aus `r sum(wahlergebnisse$Gruene_Listenstimmen)` Stimmen für die Liste und `r sum(wahlergebnisse$Gruene_Kandidatenstimmen)` Stimmen für Personen zusammen.
-
-Wie auch im Bundestrend haben die Grünen in Verden auf kommunaler Ebene den größten Anteil an BriefwählerInnen.
+Die Gesamtstimmenanzahl der Grünen setzt sich aus `r sum(wahlergebnisse$Gruene_Listenstimmen)` Stimmen für die Liste und `r sum(wahlergebnisse$Gruene_Kandidatenstimmen)` Stimmen für Personen zusammen.
 
 Die einzelnen KandidatInnen waren beim Sammeln von Erststimmen sehr unterschiedlich erfolgreich.
 
@@ -281,29 +326,32 @@ leaflet(data = wahl21) %>%
 
 ```
 
-Die Unterschiede sind erheblich.In Walle, Döhlbergen, Rieda sowie rund um die Straße Trift ist der Anteil der GrünwählerInnen am geringsten. 
+Die Unterschiede sind erheblich. In Walle, Schwarnhorst, Döhlbergen, Rieda sowie rund um die Straße Trift ist der Anteil der GrünwählerInnen am geringsten. 
 
 Die Hochburgen sind dagegen die Kernstadt, Burgberg, Borstel und Nemühlen. Aber auch in Hutbergen stehen die Grünen nicht schlecht da.
 
 # Anknüpfungspunkte & Interpetationen als Diskussionsanreize für die AG Demopkratie stärken
 
-Die Tatsache, dass es bei der Kommunalwahl mindestens `r sum(wahlergebnisse$Gruene_Alle_Stimmen)/3` Menschen gab, die den Grünen zu mindest eine Stimme gegeben haben (wahrscheinlich gab es aber mehr davon) ist erstaunlich, wenn man bedenkt, dass die Anzahl der aktiven Grünen in Verden bei ca. 20-30 steht. Da könnte es ein großes Potenzial an Menschen geben, die für die kommunalpolitische Arbeit begeisterbar wären. Was sind die Motive, die Grünen zu wählen, aber keinerlei öffentliche grüne Aktivitäten zu setzen? 
+Die Tatsache, dass es bei der Kommunalwahl mindestens `r sum(wahlergebnisse$Gruene_Alle_Stimmen)/3` Menschen gab, die den Grünen zu mindest eine Stimme gegeben haben (wahrscheinlich gab es aber mehr davon) ist erstaunlich, wenn man bedenkt, dass die Anzahl der aktiven Grünen in Verden bei ca. 20-30 Personen steht. Da könnte es ein großes Potenzial an Menschen geben, die für die kommunalpolitische Arbeit begeisterbar wären. Was sind die Motive, die Grünen zu wählen, aber keinerlei öffentliche grüne Aktivitäten zu setzen? 
 
-Es ist ein bundesweites Phänomen, dass der Anteil der Briefwahlstimmen steigt. Was bedeutet es für die Fragestellungen unserer AG, dass immer mehr Menschen nicht vor ORt wählen wollen oder können und sich statt dessen für die Briefwahl entscheiden? Und warum haben die Grünen den höchsten Anteil an Briefwahlstimmen unter allen Parteien?
+Es ist ein bundesweites Phänomen, dass der Anteil der Briefwahlstimmen steigt. Was bedeutet es für die Fragestellungen unserer AG, dass immer mehr Menschen nicht vor Ort wählen wollen oder können und sich statt dessen für die Briefwahl entscheiden? Und warum haben die Grünen den höchsten Anteil an Briefwahlstimmen unter allen Parteien?
 
 Die Liste der Erststimmen zeigt eigentlich wenig Überraschendes, aber doch einiges Erwähnenswertes: 
-(1) Wer schon länger in der Politik ist oder war (Johanna, Rasmus, Bärbel, Uwe, Hanne) sind bekannt und bekommen viele Stimmen.
-(2) Die hohe Erststimmenanzahl für Alina zeigt, dass WählerInnen gerne bereit sind jüngeren und weniger etablierten Menschen ihre Stimme zu geben. GrünwählerInnen sind sich essen offenbar bewusst Die strukturellen Probleme für Jüngere und Frauen sind also weniger in der Grünen Wahlkabine zu suchen, also woanders - aber wo??? Weitere Analyseidee: Auswerten, ob jüngere Frauen auch in den anderen Listen große Zustimmung erfahren haben, oder ob das ein "Grünes Phänomen" ist.
-(3) Menschen, die weder in Verden ihre Ausbildung genossen haben, noch beruflich hier verankert waren/sind, noch dazu Ausländer sind und sich bis dato vor Ort nicht öffentlich engagiert haben (Werner), bekommen eher weniger Erststimmen. Das ist auch wenig erstaunlich.
 
+- Wer schon länger in der Politik ist oder war oder vielleicht durch Beruf viele Leute kennt (Johanna, Rasmus, Bärbel, Uwe, Hanne) bekommt viele Stimmen.
+- Die hohe Erststimmenanzahl für Alina zeigt, dass WählerInnen gerne bereit sind, jüngeren und weniger etablierten Menschen ihre Stimme zu geben. Die strukturellen Hürden für Jüngere und Frauen in die Kommunalpolitik einzusteigen, sind also weniger in der Grünen Wahlkabine zu suchen, sondern woanders - aber wo??? Weitere Analyseidee: Auswerten, ob jüngere Frauen auch in den anderen Listen große Zustimmung erfahren haben, oder ob das ein "Grünes Phänomen" ist.
+- Menschen, die weder in Verden ihre Ausbildung genossen haben, noch beruflich hier verankert waren/sind, noch dazu Ausländer sind und sich bis dato vor Ort nicht öffentlich engagiert haben (Werner), bekommen eher weniger Erststimmen. Das ist auch wenig erstaunlich.
 
+Wenn wir uns auch um jene Stadtteile kümmern wollen, wo der Anteil von GrünwählerInnen gering ist, müssten wir nach Scharnhorst, Döhlbergen/Rieda sowie nach Walle gehen. Woran liegt der geringe Anteil der Grünen Stimmen in diesen Ortsteilen? Vielleicht an der stärkeren landwirtschafltichen Prägung? Was ist in Walle los? Entgegen einer landläufigen Ansicht sind die Grünen in Verden nicht nur eine Partei von GutverdienerInnen sondern auch von Nicht-LandwirtInnen.
 
 # Credits {-}
 
-Besten Dank an Frau Rein und Herrn Kämpfert von der Stadt Verden für die Kooperation bezüglich der Daten über die Wahlbezirke. 
+Besten Dank an Frau Rein und Herrn Kämpfert von der Stadt Verden für die Kooperation bezüglich der Daten über die Verdener Wahlbezirke. 
 
-Die Daten über die Wahlergebnisse sind unter <https://votemanager.kdo.de/20210912/03361012/praesentation/opendata.html> frei verfügbar.
+Die Daten über die Wahlergebnisse sind unter [den Wahlseiten der Stadt Verden](<https://votemanager.kdo.de/20210912/03361012/praesentation/opendata.html>) frei verfügbar.
 
-Die Daten zur Stadtgrenze sind © GeoBasis-DE / BKG 2021.
+Die Daten für die Landkarte kommen über [leaflet](www.leafletjs.com) aus der [OpenStreetMap.org](www.openstreetmap.org) abgerufen.
 
-Dieses Dokument wurde ausschließlich mit Open Source Software erzeugt: mit RStudio, Markdown und GNU/Linux Ubuntu 20.04. Sein Sourcecode ist frei verfügbar unter [www.github.com/soziologikus/wahlanalyse_verden](www.guthub.com/soziologikus/wahlanalyse_verden).
+Die Daten der Stadtgrenze sind © GeoBasis-DE / [BKG](https://gdz.bkg.bund.de/index.php/default/verwaltungsgebiete-1-250-000-ebenen-stand-01-01-vg250-ebenen-01-01.html) 2021 und frei verfügbar.
+
+Dieses Dokument wurde ausschließlich mit Open Source Software erzeugt: mit RStudio, Markdown und GNU/Linux Ubuntu 20.04. Sein Sourcecode ist auf meinem [github](www.guthub.com/soziologikus/wahlanalyse_verden) frei verfügbar.
