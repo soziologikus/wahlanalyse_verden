@@ -330,7 +330,7 @@ Die Unterschiede sind erheblich. In Walle, Schwarnhorst, Döhlbergen, Rieda sowi
 
 Die Hochburgen sind dagegen die Kernstadt, Burgberg, Borstel und Nemühlen. Aber auch in Hutbergen stehen die Grünen nicht schlecht da.
 
-# Anknüpfungspunkte & Interpetationen als Diskussionsanreize für die AG Demopkratie stärken
+# Anknüpfungspunkte & Interpretationen
 
 Die Tatsache, dass es bei der Kommunalwahl mindestens `r sum(wahlergebnisse$Gruene_Alle_Stimmen)/3` Menschen gab, die den Grünen zu mindest eine Stimme gegeben haben (wahrscheinlich gab es aber mehr davon) ist erstaunlich, wenn man bedenkt, dass die Anzahl der aktiven Grünen in Verden bei ca. 20-30 Personen steht. Da könnte es ein großes Potenzial an Menschen geben, die für die kommunalpolitische Arbeit begeisterbar wären. Was sind die Motive, die Grünen zu wählen, aber keinerlei öffentliche grüne Aktivitäten zu setzen? 
 
@@ -354,4 +354,4 @@ Die Daten für die Landkarte kommen über [leaflet](www.leafletjs.com) aus der [
 
 Die Daten der Stadtgrenze sind © GeoBasis-DE / [BKG](https://gdz.bkg.bund.de/index.php/default/verwaltungsgebiete-1-250-000-ebenen-stand-01-01-vg250-ebenen-01-01.html) 2021 und frei verfügbar.
 
-Dieses Dokument wurde ausschließlich mit Open Source Software erzeugt: mit RStudio, Markdown und GNU/Linux Ubuntu 20.04. Sein Sourcecode ist auf meinem [github](www.guthub.com/soziologikus/wahlanalyse_verden) frei verfügbar.
+Dieses Dokument wurde ausschließlich mit Open Source Software erzeugt: mit RStudio, Markdown und GNU/Linux Ubuntu 20.04. Sein Sourcecode ist auf meinem [github](www.guthub.com/soziologikus/) frei verfügbar.
