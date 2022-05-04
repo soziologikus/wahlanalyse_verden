@@ -43,13 +43,18 @@ Kritik, Rückfragen und Anregungen gehen bitte an [Werner Reichmann](mailto:w.re
 
 # 1. Create a dataframe with data of the borders of Verden
 # Read and transform the borders of Verden
-germany_gemeindegrenzen <- readOGR(
-  dsn="data/shp_file/VG250_GEM_2021.shp",
-  verbose=FALSE)
-verden_border_ll <- spTransform(germany_gemeindegrenzen, CRS("+proj=longlat +ellps=GRS80"))
-verden_border_ll <- tidy(verden_border_ll, region = "GEN")
-verden_border_ll <- verden_border_ll %>% filter(id == "Verden (Aller)")
-remove(germany_gemeindegrenzen)
+# As it takes long to create this dataset and the packages make several problemsI did it one time using this code:
+# germany_gemeindegrenzen <- readOGR(
+#   dsn="data/shp_file/VG250_GEM_2021.shp",
+#   verbose=FALSE)
+# verden_border_ll <- spTransform(germany_gemeindegrenzen, CRS("+proj=longlat +ellps=GRS80"))
+# verden_border_ll <- tidy(verden_border_ll, region = "GEN")
+# verden_border_ll <- verden_border_ll %>% filter(id == "Verden (Aller)")
+# remove(germany_gemeindegrenzen)
+#
+# I saved it and import it now. Thats much faster.
+# write.csv(verden_border_ll, "data/verden_border_ll.csv", row.names = FALSE)
+verden_border_ll <- read_csv("data/verden_border_ll.csv")
 # --------------------------------------
 
 
@@ -253,10 +258,13 @@ df_temp <- data.frame(parteien, ergebnis2016, ergebnis2011, ergebnis2006, ergebn
 
 df_temp %>%
   kbl(col.names = c("Parteien", "2006", "2011", "2016", "2021"),
-      caption = "Stadtratswahlergebnisse") %>%
+      caption = "Stadtratswahlergebnisse",
+      align = "lcccc",
+      digits = c(0,0,0,0)) %>%
   kable_styling(bootstrap_options = c("hover"), 
                 full_width = F, 
                 position = "center")
+
 remove(df_temp, ergebnis2006, ergebnis2011, ergebnis2016, ergebnis2021)
 
 ```
@@ -290,7 +298,15 @@ kandidaten_stimmen = c(sum(wahlergebnisse$Johanna),
                        sum(wahlergebnisse$Uwe)
                            )
 df_temp <- data.frame(kandidaten, kandidaten_stimmen)
-kable(df_temp[order(df_temp$kandidaten_stimmen, decreasing = TRUE),], format = "simple", col.names = c("KandidatInnen", "Stimmen (n)"), caption = "Erststimmen der Grünen KandidatInnen, absteigend geordnet")
+
+kbl(df_temp[order(df_temp$kandidaten_stimmen, decreasing = TRUE),], 
+    col.names = c("KandidatInnen", "Stimmen (n)"), 
+    caption = "Erststimmen der Grünen KandidatInnen, absteigend geordnet") %>%
+ kable_styling(bootstrap_options = c("hover"), 
+                full_width = F, 
+                position = "center")
+
+
 remove(df_temp, kandidaten, kandidaten_stimmen)
 ```
 
@@ -326,7 +342,7 @@ leaflet(data = wahl21) %>%
 
 ```
 
-Die Unterschiede sind erheblich. In Walle, Schwarnhorst, Döhlbergen, Rieda sowie rund um die Straße Trift ist der Anteil der GrünwählerInnen am geringsten. 
+Die Unterschiede sind erheblich. In Walle, Scharnhorst, Döhlbergen, Rieda sowie rund um die Straße Trift ist der Anteil der GrünwählerInnen am geringsten. 
 
 Die Hochburgen sind dagegen die Kernstadt, Burgberg, Borstel und Nemühlen. Aber auch in Hutbergen stehen die Grünen nicht schlecht da.
 
@@ -348,10 +364,12 @@ Wenn wir uns auch um jene Stadtteile kümmern wollen, wo der Anteil von Grünwä
 
 Besten Dank an Frau Rein und Herrn Kämpfert von der Stadt Verden für die Kooperation bezüglich der Daten über die Verdener Wahlbezirke. 
 
-Die Daten über die Wahlergebnisse sind unter [den Wahlseiten der Stadt Verden](<https://votemanager.kdo.de/20210912/03361012/praesentation/opendata.html>) frei verfügbar.
+Danke an Werner Meincke für die Wahlergebnisse aus den Jahren 2006, 2011 und 2016.
 
-Die Daten für die Landkarte kommen über [leaflet](www.leafletjs.com) aus der [OpenStreetMap.org](www.openstreetmap.org) abgerufen.
+Die Daten über die Wahlergebnisse sind unter [den Wahlseiten der Stadt Verden](https://votemanager.kdo.de/20210912/03361012/praesentation/opendata.html) frei verfügbar.
+
+Die Daten für die Landkarte kommen über [leaflet](http://www.leafletjs.com) aus der [OpenStreetMap.org](http://www.openstreetmap.org) abgerufen.
 
 Die Daten der Stadtgrenze sind © GeoBasis-DE / [BKG](https://gdz.bkg.bund.de/index.php/default/verwaltungsgebiete-1-250-000-ebenen-stand-01-01-vg250-ebenen-01-01.html) 2021 und frei verfügbar.
 
-Dieses Dokument wurde ausschließlich mit Open Source Software erzeugt: mit RStudio, Markdown und GNU/Linux Ubuntu 20.04. Sein Sourcecode ist auf meinem [github](www.guthub.com/soziologikus/) frei verfügbar.
+Dieses Dokument wurde ausschließlich mit Open Source Software erzeugt: mit [R](https://www.r-project.org/), [RStudio](http://www.rstudio.org), [R Markdown](https://rmarkdown.rstudio.com) und [GNU](https://www.gnu.org)/[Linux](https://www.linuxfoundation.org/) [Ubuntu 20.04](https://www.ubuntu.com/). Sein Sourcecode ist auf meinem [github](http://www.github.com/soziologikus/) frei verfügbar.
